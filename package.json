@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "@types/es6-promise": "^3.3.0",
+    "node-fetch": "^2.6.1"
+  },
+  "devDependencies": {
+    "@types/node-fetch": "^2.5.8"
+  }
+}
