@@ -1,4 +1,5 @@
 import fetch from 'node-fetch'
+import Item from './classes/Item'
 
 import Product from './classes/Product'
 import removeColor from './utils/removeColor'
@@ -32,7 +33,7 @@ async function main() {
         ))
     }
 
-    
+    const item: Item = new Item('Undead Bow', 4000, 0)
 }
 
 main()
