@@ -1,6 +1,6 @@
 import fetch from 'node-fetch'
 
-import Product from './classes/product'
+import Product from './classes/Product'
 import removeColor from './utils/removeColor'
 
 const get = async (str: string) => await (await fetch(str)).json()
@@ -30,8 +30,9 @@ async function main() {
             data.auctions[i].bids,
             data.auctions[i].bin
         ))
-        console.log(removeColor(data.auctions[i].item_lore))
     }
+
+    
 }
 
 main()
