@@ -3,6 +3,7 @@ import Item from './classes/Item'
 
 import Product from './classes/Product'
 import removeColor from './utils/removeColor'
+import getItem from './utils/getItem'
 
 const get = async (str: string) => await (await fetch(str)).json()
 
@@ -29,11 +30,12 @@ async function main() {
             data.auctions[i].clasimed_bidders,
             data.auctions[i].highest_bid_amount,
             data.auctions[i].bids,
-            data.auctions[i].bin
+            data.auctions[i].bin ? true : false
         ))
     }
 
-    const item: Item = new Item('Undead Bow', 4000, 0)
+    const item: Item = new Item('Leggings', 40000000, 0)
+    getItem(products, item)
 }
 
 main()
