@@ -1,11 +1,28 @@
+import path from 'path'
 import fetch from 'node-fetch'
-import Item from './classes/Item'
+import { Client } from 'discord.js'
+import { readJSONSync } from 'fs-extra'
 
+import Item from './classes/Item'
 import Product from './classes/Product'
 import removeColor from './utils/removeColor'
 import getItem from './utils/getItem'
 
+const client = new Client()
+const PATH = path.resolve()
+const { token } = readJSONSync(PATH + '/settings.json')
+
 const get = async (str: string) => await (await fetch(str)).json()
+
+client.on('ready', async () => {
+    console.log('[*] Ready')
+    
+    setInterval(async () => {
+        await main()
+    }, 60000)
+})
+
+client.login(token)
 
 async function main() {
     const data = await get('https://api.hypixel.net/skyblock/auctions')

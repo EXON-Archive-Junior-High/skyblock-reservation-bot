@@ -1,6 +1,9 @@
 {
   "dependencies": {
     "@types/es6-promise": "^3.3.0",
+    "@types/fs-extra": "^9.0.9",
+    "discord.js": "^12.5.1",
+    "fs-extra": "^9.1.0",
     "node-fetch": "^2.6.1"
   },
   "devDependencies": {
