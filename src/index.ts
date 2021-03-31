@@ -1,6 +1,6 @@
 import path from 'path'
 import fetch from 'node-fetch'
-import { Client } from 'discord.js'
+import { Client, TextChannel } from 'discord.js'
 import { readJSONSync } from 'fs-extra'
 
 import Item from './classes/Item'
@@ -10,7 +10,7 @@ import getItem from './utils/getItem'
 
 const client = new Client()
 const PATH = path.resolve()
-const { token } = readJSONSync(PATH + '/settings.json')
+const { token, channel_id } = readJSONSync(PATH + '/settings.json')
 
 const get = async (str: string) => await (await fetch(str)).json()
 
@@ -52,7 +52,11 @@ async function main() {
     }
 
     const item: Item = new Item('Leggings', 40000000, 0)
-    getItem(products, item)
+    const item_list: Product[] = getItem(products, item)
+
+    item_list.forEach(async (product) => {
+        await (client?.channels?.cache?.get(channel_id) as TextChannel)?.send(product.item_name + '\n' + product.item_lore)
+    })
 }
 
 main()
