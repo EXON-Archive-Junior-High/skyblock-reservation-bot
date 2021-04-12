@@ -8,9 +8,9 @@ export default function product2embed(products: Product[]): MessageEmbed[] {
     products.forEach((product) => {
         const presentBid: number = product.bids.length ? product.bids[product.bids.length - 1].amount : product.starting_bid
         embeds[i] = new MessageEmbed({
-            title: product.item_name,
+            title: product.item_name + ' - ' + presentBid.toLocaleString('en-US') + '원',
             author: {
-
+                
             },
             color: getItemColor(product.tier),
             fields: [
@@ -21,7 +21,7 @@ export default function product2embed(products: Product[]): MessageEmbed[] {
             ],
             timestamp: new Date(),
             footer: {
-                text: presentBid.toString()
+                text: presentBid.toLocaleString('en-US') + '원'
             }
         })
         i++

@@ -52,7 +52,7 @@ async function main() {
         ))
     }
 
-    const item: Item = new Item('Leggings', 40000000, 0)
+    const item: Item = new Item('overflux', 4000000000, 0)
     const item_list: Product[] = getItem(products, item)
     const embeds: MessageEmbed[] = product2embed(item_list)
 
