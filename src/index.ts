@@ -1,12 +1,13 @@
 import path from 'path'
 import fetch from 'node-fetch'
-import { Client, TextChannel } from 'discord.js'
+import { Client, MessageEmbed, TextChannel } from 'discord.js'
 import { readJSONSync } from 'fs-extra'
 
 import Item from './classes/Item'
 import Product from './classes/Product'
 import removeColor from './utils/removeColor'
 import getItem from './utils/getItem'
+import product2embed from './utils/product2embed'
 
 const client = new Client()
 const PATH = path.resolve()
@@ -53,9 +54,10 @@ async function main() {
 
     const item: Item = new Item('Leggings', 40000000, 0)
     const item_list: Product[] = getItem(products, item)
+    const embeds: MessageEmbed[] = product2embed(item_list)
 
-    item_list.forEach(async (product) => {
-        await (client?.channels?.cache?.get(channel_id) as TextChannel)?.send(product.item_name + '\n' + product.item_lore)
+    embeds.forEach(async (embed) => {
+        await (client?.channels?.cache?.get(channel_id) as TextChannel)?.send(embed)
     })
 }
 

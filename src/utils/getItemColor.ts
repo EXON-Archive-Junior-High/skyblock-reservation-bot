@@ -1,4 +1,4 @@
-export function getItemColor(tier: string): number {
+export default function getItemColor(tier: string): number {
     switch (tier) {
         case 'COMMON':
             return 0xffffff
