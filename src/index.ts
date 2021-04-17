@@ -17,19 +17,19 @@ const get = async (str: string) => await (await fetch(str)).json()
 
 client.on('ready', async () => {
     console.log('[*] Ready')
-    
+
     setInterval(async () => {
         await main()
     }, 60000)
 })
 
-client.login(token)
-
 async function main() {
+    console.log('Loading...')
     const data = await get('https://api.hypixel.net/skyblock/auctions')
     if (!data.success) return
     let products: Product[] = new Array<Product>()
     for (let i = 0; i < data.auctions.length; i++) {
+        console.log('dd')
         products.push(new Product(
             data.auctions[i].uuid,
             data.auctions[i].auctioneer,
@@ -52,13 +52,16 @@ async function main() {
         ))
     }
 
-    const item: Item = new Item('overflux', 4000000000, 0)
+    const item: Item = new Item('Leggings', 400000, 0)
+    console.log(item)
     const item_list: Product[] = getItem(products, item)
+    console.log(item_list)
     const embeds: MessageEmbed[] = product2embed(item_list)
 
     embeds.forEach(async (embed) => {
-        await (client?.channels?.cache?.get(channel_id) as TextChannel)?.send(embed)
+        console.log('Sending...')
+        setTimeout(() => { (client?.channels?.cache?.get(channel_id) as TextChannel)?.send(embed) }, 1000)
     })
 }
 
-main()
+client.login(token)
