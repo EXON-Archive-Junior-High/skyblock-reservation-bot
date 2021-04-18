@@ -29,10 +29,10 @@ async function main() {
     if (!data.success) return
     let products: Product[] = new Array<Product>()
     for (let i = 0; i < data.auctions.length; i++) {
-        console.log('dd')
+        const auctioneer = await get('https://sessionserver.mojang.com/session/minecraft/profile/' + data.auctions[i].auctioneer)
         products.push(new Product(
             data.auctions[i].uuid,
-            data.auctions[i].auctioneer,
+            auctioneer.name,
             data.auctions[i].profile_id,
             data.auctions[i].coop,
             data.auctions[i].start,
@@ -52,7 +52,7 @@ async function main() {
         ))
     }
 
-    const item: Item = new Item('Leggings', 400000, 0)
+    const item: Item = new Item('Leggings', 400000000, 0)
     console.log(item)
     const item_list: Product[] = getItem(products, item)
     console.log(item_list)
