@@ -1,6 +1,6 @@
 import path from 'path'
 import fetch from 'node-fetch'
-import { Client, MessageEmbed, TextChannel } from 'discord.js'
+import { Client, Message, MessageEmbed, TextChannel } from 'discord.js'
 import { readJSONSync } from 'fs-extra'
 
 import Item from './classes/Item'
@@ -45,28 +45,23 @@ client.on('message', async (msg) => {
     if (msg.author.bot) return
     if (!msg.content.startsWith(prefix)) return
 
-    let args: string[] = []
-    let _args = msg.content.split(' ').slice(1)
-    let temp: string[] = []
-    _args.forEach(v => {
-        if (temp.length !== 0) {
-            temp.push(v)
-            if (v.endsWith('"')) {
-                let temp_ = temp.join(' ')
-                args.push(temp_.substring(1, temp_.length - 1))
-                temp = []
-            }
-        } else {
-            if (v.startsWith('"')) temp.push(v)
-            else args.push(v)
-        }
-    })
+    let args: string[] = msg.content.split(/ +(?=[\w]+\:)/g).slice(1)
 
     if (args[0] === '예약') {
         const price: number = +args[2]
         const isBin: number = getBin(args[3].toLowerCase())
 
         await db('channels').insert({ user: msg.author.id, channel_id: msg.channel.id, item_name: args[1], item_price: price, item_bin: isBin})
+    } else if (args[0] === '목록') {
+        console.log('f')
+        const rows = await db('channels').select('*').where('user', msg.author.id)
+        let message = ''
+        rows.forEach((row: { item_name: string }) => {
+            message += row.item_name + '\n'
+        })
+        msg.channel.send(message)
+    } else if (args[0] === '삭제') {
+        
     }
 })
 
