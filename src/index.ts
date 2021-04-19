@@ -11,9 +11,27 @@ import product2embed from './utils/product2embed'
 
 const client = new Client()
 const PATH = path.resolve()
-const { token, channel_id } = readJSONSync(PATH + '/settings.json')
+const { token, mariadb, prefix } = readJSONSync(PATH + '/settings.json')
+const db = require('knex') ({
+    client: 'mysql2',
+    connection: {
+        host     : mariadb.host,
+        port     : mariadb.port,
+        user     : mariadb.user,
+        password : mariadb.password,
+        database : mariadb.database
+    }
+})
 
 const get = async (str: string) => await (await fetch(str)).json()
+const getBin = (str: string) => {
+    switch (str) {
+        case 'bin': return 1
+        case 'auction': return 2
+        case 'any': return 0
+        default: return 0
+    }
+}
 
 client.on('ready', async () => {
     console.log('[*] Ready')
@@ -21,6 +39,35 @@ client.on('ready', async () => {
     setInterval(async () => {
         await main()
     }, 60000)
+})
+
+client.on('message', async (msg) => {
+    if (msg.author.bot) return
+    if (!msg.content.startsWith(prefix)) return
+
+    let args: string[] = []
+    let _args = msg.content.split(' ').slice(1)
+    let temp: string[] = []
+    _args.forEach(v => {
+        if (temp.length !== 0) {
+            temp.push(v)
+            if (v.endsWith('"')) {
+                let temp_ = temp.join(' ')
+                args.push(temp_.substring(1, temp_.length - 1))
+                temp = []
+            }
+        } else {
+            if (v.startsWith('"')) temp.push(v)
+            else args.push(v)
+        }
+    })
+
+    if (args[0] === '예약') {
+        const price: number = +args[2]
+        const isBin: number = getBin(args[3].toLowerCase())
+
+        await db('channels').insert({ user: msg.author.id, channel_id: msg.channel.id, item_name: args[1], item_price: price, item_bin: isBin})
+    }
 })
 
 async function main() {
@@ -51,17 +98,17 @@ async function main() {
             data.auctions[i].bin ? true : false
         ))
     }
-
+    
     const item: Item = new Item('Leggings', 400000000, 0)
     console.log(item)
     const item_list: Product[] = getItem(products, item)
     console.log(item_list)
     const embeds: MessageEmbed[] = product2embed(item_list)
 
-    embeds.forEach(async (embed) => {
-        console.log('Sending...')
-        setTimeout(() => { (client?.channels?.cache?.get(channel_id) as TextChannel)?.send(embed) }, 1000)
-    })
+    // embeds.forEach(async (embed) => {
+    //     console.log('Sending...')
+    //     setTimeout(() => { (client?.channels?.cache?.get(channel_id) as TextChannel)?.send(embed) }, 1000)
+    // })
 }
 
 client.login(token)
