@@ -106,16 +106,20 @@ async function main() {
         ))
     }
     
-    const item: Item = new Item('Leggings', 400000000, 0)
-    console.log(item)
-    const item_list: Product[] = getItem(products, item)
-    console.log(item_list)
-    const embeds: MessageEmbed[] = product2embed(item_list)
-
-    // embeds.forEach(async (embed) => {
-    //     console.log('Sending...')
-    //     setTimeout(() => { (client?.channels?.cache?.get(channel_id) as TextChannel)?.send(embed) }, 1000)
-    // })
+    const reservations = await db('channels').select('*')
+    console.log(reservations)
+    reservations.forEach((reservation: any) => {
+        const item: Item = new Item(reservation.item_name, reservation.item_price, reservation.item_bin)
+        console.log(item)
+        const item_list: Product[] = getItem(products, item)
+        console.log(item_list)
+        const embeds: MessageEmbed[] = product2embed(item_list)
+    
+        embeds.forEach(async (embed) => {
+            console.log('Sending...')
+            setTimeout(() => { (client?.channels?.cache?.get(reservation.channel_id) as TextChannel)?.send(embed) }, 1000)
+        })
+    })
 }
 
 client.login(token)
