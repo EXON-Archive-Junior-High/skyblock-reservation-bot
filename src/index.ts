@@ -2,6 +2,7 @@ import path from 'path'
 import fetch from 'node-fetch'
 import { Client, Message, MessageEmbed, TextChannel } from 'discord.js'
 import { readJSONSync } from 'fs-extra'
+import { splitSpacesExcludeQuotes } from 'quoted-string-space-split'
 
 import Item from './classes/Item'
 import Product from './classes/Product'
@@ -24,12 +25,21 @@ const db = require('knex') ({
 })
 
 const get = async (str: string) => await (await fetch(str)).json()
-const getBin = (str: string) => {
-    switch (str) {
-        case 'bin': return 1
-        case 'auction': return 2
-        case 'any': return 0
-        default: return 0
+const getBin = (v: string | number) => {
+    if (typeof(v) === 'string') {
+        switch (v) {
+            case 'bin': return 1
+            case 'auction': return 2
+            case 'any': return 0
+            default: return 0
+        }
+    } else if (typeof(v) === 'number') {
+        switch (v) {
+            case 1: return 'bin'
+            case 2: return 'auction'
+            case 0: return 'any'
+            default: return 'Error'
+        }
     }
 }
 
@@ -45,23 +55,23 @@ client.on('message', async (msg) => {
     if (msg.author.bot) return
     if (!msg.content.startsWith(prefix)) return
 
-    let args: string[] = msg.content.split(/ +(?=[\w]+\:)/g).slice(1)
+    let args: string[] = splitSpacesExcludeQuotes(msg.content).slice(1)
 
     if (args[0] === '예약') {
         const price: number = +args[2]
-        const isBin: number = getBin(args[3].toLowerCase())
+        const isBin = getBin(args[3].toLowerCase())
 
         await db('channels').insert({ user: msg.author.id, channel_id: msg.channel.id, item_name: args[1], item_price: price, item_bin: isBin})
+        msg.channel.send(new MessageEmbed({title: '✅ Success', description: '"' + args[1] + '" Successfully registered'}))
     } else if (args[0] === '목록') {
-        console.log('f')
         const rows = await db('channels').select('*').where('user', msg.author.id)
-        let message = ''
-        rows.forEach((row: { item_name: string }) => {
-            message += row.item_name + '\n'
+        let embed: MessageEmbed = new MessageEmbed({ title: 'Item List' })
+        rows.forEach((row: any) => {
+            embed.addField(row.item_name, ':coin:: ' + row.item_price + '\n🛒: ' + getBin(row.item_bin))
         })
-        msg.channel.send(message)
+        msg.channel.send(embed)
     } else if (args[0] === '삭제') {
-        
+        await db('channels').where({ user: msg.author.id, item_name: args[1] })
     }
 })
 
