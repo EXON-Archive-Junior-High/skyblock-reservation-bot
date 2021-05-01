@@ -1,7 +1,6 @@
 import { MessageEmbed } from 'discord.js'
 import Product from '../classes/Product'
 import getItemColor from './getItemColor'
-import fetch from 'node-fetch'
 
 export default function product2embed(products: Product[]): MessageEmbed[] {
     const embeds: MessageEmbed[] = new Array<MessageEmbed>()

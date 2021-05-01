@@ -80,13 +80,13 @@ client.on('message', async (msg) => {
 async function main() {
     console.log('Loading...')
     const data = await get('https://api.hypixel.net/skyblock/auctions')
-    if (!data.success) return
+    if (!data.success) { console.log('end'); return }
     let products: Product[] = new Array<Product>()
     for (let i = 0; i < data.auctions.length; i++) {
-        const auctioneer = await get('https://sessionserver.mojang.com/session/minecraft/profile/' + data.auctions[i].auctioneer)
+        // const auctioneer = await get('https://sessionserver.mojang.com/session/minecraft/profile/' + data.auctions[i].auctioneer)
         products.push(new Product(
             data.auctions[i].uuid,
-            auctioneer.name,
+            data.auctions[i].auctioneer,
             data.auctions[i].profile_id,
             data.auctions[i].coop,
             data.auctions[i].start,
@@ -106,9 +106,11 @@ async function main() {
         ))
     }
     
+    console.log('fda')
     const reservations = await db('channels').select('*')
     console.log(reservations)
     reservations.forEach((reservation: any) => {
+        console.log(reservation.user)
         const item: Item = new Item(reservation.item_name, reservation.item_price, reservation.item_bin)
         console.log(item)
         const item_list: Product[] = getItem(products, item)
