@@ -8,7 +8,7 @@ export default function product2embed(products: Product[]): MessageEmbed[] {
     products.forEach((product) => {
         const presentBid: number = product.bids.length ? product.bids[product.bids.length - 1].amount : product.starting_bid
         embeds[i] = new MessageEmbed({
-            title: product.isBin ? '[Bin] ': '[Auction] ' + product.item_name + ' - ' + presentBid.toLocaleString('en-US') || presentBid + '원',
+            title: product.isBin ? '[Bin] ' + product.item_name: '[Auction] ' + product.item_name + ' - ' + presentBid.toLocaleString('en-US') || presentBid + '원',
             author: {
                 name: 'Hypixel',
                 icon_url: 'https://avatars.githubusercontent.com/u/3840546?s=280&v=4'
