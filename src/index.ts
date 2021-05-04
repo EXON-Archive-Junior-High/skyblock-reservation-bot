@@ -61,17 +61,17 @@ client.on('message', async (msg) => {
         const price: number = +args[2]
         const isBin = getBin(args[3].toLowerCase())
 
-        await db('channels').insert({ user: msg.author.id, channel_id: msg.channel.id, item_name: args[1], item_price: price, item_bin: isBin})
+        await db('reservation').insert({ user: msg.author.id, channel_id: msg.channel.id, item_name: args[1], item_price: price, item_bin: isBin})
         msg.channel.send(new MessageEmbed({title: '✅ Success', description: '"' + args[1] + '" Successfully registered', color: 0x00FF00 }))
     } else if (args[0] === 'list') {
-        const rows = await db('channels').select('*').where('user', msg.author.id)
+        const rows = await db('reservation').select('*').where('user', msg.author.id)
         let embed: MessageEmbed = new MessageEmbed({ title: 'Item List', color: 0x00FF00 })
         rows.forEach((row: any) => {
             embed.addField(row.item_name, ':coin:: ' + row.item_price + '\n🛒: ' + getBin(row.item_bin))
         })
         msg.channel.send(embed)
     } else if (args[0] === 'delete' || args[0] === 'remove') {
-        const isSuccess = await db('channels').where({ user: msg.author.id, item_name: args[1] }).del()
+        const isSuccess = await db('reservation').where({ user: msg.author.id, item_name: args[1] }).del()
         if (isSuccess) msg.channel.send(new MessageEmbed({ title: '✅ Success', description: '"' + args[1] + '" Deleted successfully', color: 0x00FF00 }))
         else msg.channel.send(new MessageEmbed({ title: '❎ Failed', description: 'failed', color: 0xFF0000}))
     }
@@ -106,7 +106,7 @@ async function main() {
         ))
     }
 
-    const reservations = await db('channels').select('*')
+    const reservations = await db('reservation').select('*')
     reservations.forEach((reservation: any) => {
         const item: Item = new Item(reservation.item_name, reservation.item_price, reservation.item_bin)
         const item_list: Product[] = getItem(products, item)
