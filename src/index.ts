@@ -58,12 +58,16 @@ client.on('message', async (msg) => {
     let args: string[] = splitSpacesExcludeQuotes(msg.content).slice(1)
 
     if (args[0] === 'add') {
+        console.log(`[Add] ${msg.author.id}(${msg.channel.id}) : ${args[1]}`)
+
         const price: number = +args[2]
         const isBin = getBin(args[3].toLowerCase())
 
         await db('reservation').insert({ user: msg.author.id, channel_id: msg.channel.id, item_name: args[1], item_price: price, item_bin: isBin})
         msg.channel.send(new MessageEmbed({title: '✅ Success', description: '"' + args[1] + '" Successfully registered', color: 0x00FF00 }))
     } else if (args[0] === 'list') {
+        console.log(`[List] ${msg.author.id}(${msg.channel.id})`)
+
         const rows = await db('reservation').select('*').where('user', msg.author.id)
         let embed: MessageEmbed = new MessageEmbed({ title: 'Item List', color: 0x00FF00 })
         rows.forEach((row: any) => {
@@ -71,6 +75,8 @@ client.on('message', async (msg) => {
         })
         msg.channel.send(embed)
     } else if (args[0] === 'delete' || args[0] === 'remove') {
+        console.log(`[Delete] ${msg.author.id}(${msg.channel.id}) : ${args[1]}`)
+
         const isSuccess = await db('reservation').where({ user: msg.author.id, item_name: args[1] }).del()
         if (isSuccess) msg.channel.send(new MessageEmbed({ title: '✅ Success', description: '"' + args[1] + '" Deleted successfully', color: 0x00FF00 }))
         else msg.channel.send(new MessageEmbed({ title: '❎ Failed', description: 'failed', color: 0xFF0000}))
@@ -78,9 +84,8 @@ client.on('message', async (msg) => {
 })
 
 async function main() {
-    console.log('Loading...')
     const data = await get('https://api.hypixel.net/skyblock/auctions')
-    if (!data.success) { console.log('end'); return }
+    if (!data.success) return
     let products: Product[] = new Array<Product>()
     for (let i = 0; i < data.auctions.length; i++) {
         // const auctioneer = await get('https://sessionserver.mojang.com/session/minecraft/profile/' + data.auctions[i].auctioneer)
@@ -91,7 +96,7 @@ async function main() {
             data.auctions[i].coop,
             data.auctions[i].start,
             data.auctions[i].end,
-            data.auctions[i].item_name,
+            data.auctions[i].item_name.toLowerCase(),
             removeColor(data.auctions[i].item_lore),
             data.auctions[i].extra,
             data.auctions[i].category,
@@ -113,8 +118,9 @@ async function main() {
         const embeds: MessageEmbed[] = product2embed(item_list)
     
         embeds.forEach(async (embed) => {
-            console.log('Sending...')
-            setTimeout(() => { (client?.channels?.cache?.get(reservation.channel_id) as TextChannel)?.send(embed) }, 1000)
+            setTimeout(async () => {
+                (client?.channels?.cache?.get(reservation.channel_id) as TextChannel)?.send(embed)
+            }, 1000)
         })
     })
 }
