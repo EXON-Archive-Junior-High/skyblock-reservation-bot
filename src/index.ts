@@ -63,8 +63,14 @@ client.on('message', async (msg) => {
         const price: number = +args[2]
         const isBin = getBin(args[3].toLowerCase())
 
-        await db('reservation').insert({ user: msg.author.id, channel_id: msg.channel.id, item_name: args[1], item_price: price, item_bin: isBin})
-        msg.channel.send(new MessageEmbed({title: '✅ Success', description: '"' + args[1] + '" Successfully registered', color: 0x00FF00 }))
+        const rows = await db('reservation').select('*').where('user', msg.author.id).where('item_name', args[1])
+        if (!rows) {
+            await db('reservation').insert({ user: msg.author.id, channel_id: msg.channel.id, item_name: args[1], item_price: price, item_bin: isBin})
+            msg.channel.send(new MessageEmbed({title: '✅ Success', description: '"' + args[1] + '" Successfully registered', color: 0x00FF00 }))
+        } else
+            msg.channel.send(new MessageEmbed({title: '❎ Failed', description: 'failed', color: 0xFF0000 }))
+
+        
     } else if (args[0] === 'list') {
         console.log(`[List] ${msg.author.id}(${msg.channel.id})`)
 
@@ -79,7 +85,14 @@ client.on('message', async (msg) => {
 
         const isSuccess = await db('reservation').where({ user: msg.author.id, item_name: args[1] }).del()
         if (isSuccess) msg.channel.send(new MessageEmbed({ title: '✅ Success', description: '"' + args[1] + '" Deleted successfully', color: 0x00FF00 }))
-        else msg.channel.send(new MessageEmbed({ title: '❎ Failed', description: 'failed', color: 0xFF0000}))
+        else msg.channel.send(new MessageEmbed({ title: '❎ Failed', description: 'failed', color: 0xFF0000 }))
+    } else if (args[0] === 'help') {
+        console.log(`[Help] ${msg.author.id}(${msg.channel.id})`)
+
+        msg.channel.send(new MessageEmbed({
+            title: 'Help',
+            description: 'hi',
+        }))
     }
 })
 
@@ -112,15 +125,21 @@ async function main() {
     }
 
     const reservations = await db('reservation').select('*')
+    let overlap: any
     reservations.forEach((reservation: any) => {
         const item: Item = new Item(reservation.item_name, reservation.item_price, reservation.item_bin)
         const item_list: Product[] = getItem(products, item)
         const embeds: MessageEmbed[] = product2embed(item_list)
-    
+        
+        let i = 0
         embeds.forEach(async (embed) => {
-            setTimeout(async () => {
-                (client?.channels?.cache?.get(reservation.channel_id) as TextChannel)?.send(embed)
-            }, 1000)
+            if (!(overlap[item.name].indexOf(item_list[i].uuid) > -1)) {
+                overlap[item.name].append(item_list[i].uuid)
+                setTimeout(async () => {
+                    (client?.channels?.cache?.get(reservation.channel_id) as TextChannel)?.send(embed)
+                }, 1000)
+            }
+            i++
         })
     })
 }
