@@ -65,11 +65,11 @@ client.on('message', async (msg) => {
 
         const rows = await db(mariadb.table).select('*').where('user', msg.author.id).where('item_name', args[1])
         console.log(rows)
-        if (!rows) {
+        if (rows.length === 0) {
             await db(mariadb.table).insert({ user: msg.author.id, channel_id: msg.channel.id, item_name: args[1], item_price: price, item_bin: isBin})
             msg.channel.send(new MessageEmbed({title: '✅ Success', description: '"' + args[1] + '" Successfully registered', color: 0x00FF00 }))
         } else
-            msg.channel.send(new MessageEmbed({title: '❎ Failed', description: 'failed', color: 0xFF0000 }))
+            msg.channel.send(new MessageEmbed({title: '❎ Failed', description: 'already exists', color: 0xFF0000 }))
 
         
     } else if (args[0] === 'list') {
