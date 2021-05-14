@@ -63,9 +63,10 @@ client.on('message', async (msg) => {
         const price: number = +args[2]
         const isBin = getBin(args[3].toLowerCase())
 
-        const rows = await db('reservation').select('*').where('user', msg.author.id).where('item_name', args[1])
+        const rows = await db(mariadb.table).select('*').where('user', msg.author.id).where('item_name', args[1])
+        console.log(rows)
         if (!rows) {
-            await db('reservation').insert({ user: msg.author.id, channel_id: msg.channel.id, item_name: args[1], item_price: price, item_bin: isBin})
+            await db(mariadb.table).insert({ user: msg.author.id, channel_id: msg.channel.id, item_name: args[1], item_price: price, item_bin: isBin})
             msg.channel.send(new MessageEmbed({title: '✅ Success', description: '"' + args[1] + '" Successfully registered', color: 0x00FF00 }))
         } else
             msg.channel.send(new MessageEmbed({title: '❎ Failed', description: 'failed', color: 0xFF0000 }))
@@ -74,7 +75,7 @@ client.on('message', async (msg) => {
     } else if (args[0] === 'list') {
         console.log(`[List] ${msg.author.id}(${msg.channel.id})`)
 
-        const rows = await db('reservation').select('*').where('user', msg.author.id)
+        const rows = await db(mariadb.table).select('*').where('user', msg.author.id)
         let embed: MessageEmbed = new MessageEmbed({ title: 'Item List', color: 0x00FF00 })
         rows.forEach((row: any) => {
             embed.addField(row.item_name, ':coin:: ' + row.item_price + '\n🛒: ' + getBin(row.item_bin))
@@ -83,7 +84,7 @@ client.on('message', async (msg) => {
     } else if (args[0] === 'delete' || args[0] === 'remove') {
         console.log(`[Delete] ${msg.author.id}(${msg.channel.id}) : ${args[1]}`)
 
-        const isSuccess = await db('reservation').where({ user: msg.author.id, item_name: args[1] }).del()
+        const isSuccess = await db(mariadb.table).where({ user: msg.author.id, item_name: args[1] }).del()
         if (isSuccess) msg.channel.send(new MessageEmbed({ title: '✅ Success', description: '"' + args[1] + '" Deleted successfully', color: 0x00FF00 }))
         else msg.channel.send(new MessageEmbed({ title: '❎ Failed', description: 'failed', color: 0xFF0000 }))
     } else if (args[0] === 'help') {
@@ -124,7 +125,7 @@ async function main() {
         ))
     }
 
-    const reservations = await db('reservation').select('*')
+    const reservations = await db(mariadb.table).select('*')
     let overlap: any
     reservations.forEach((reservation: any) => {
         const item: Item = new Item(reservation.item_name, reservation.item_price, reservation.item_bin)
